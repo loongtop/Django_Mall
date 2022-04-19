@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="luffy-container">
+        <div class="btn-group" style="margin: 5px 0">
+            <a class="btn btn-default" href="/client/create/">
+                <i class="fa fa-plus-square" aria-hidden="true"></i> Adding a Client
+            </a>
+            <a class="btn btn-default" href="/client/import/">
+                <i class="fa fa-file-excel-o" aria-hidden="true"></i> Batch Import Clients
+            </a>
+        </div>
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th>ID</th><th>Name</th><th>Second Name</th><th>Phone</th><th>Email</th><th>Gender</th><th>Operation</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in user_queryset %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.second_name }}</td>
+                    <td>{{ user.phone }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.gender }}</td>
+                    <td>
+                        <a style="color: #333333;" href="/client/update/{{ user.id }}/">
+                            <i class="fa fa-edit" aria-hidden="true"></i></a>
+                        <a style="color: #d9534f;" href="/client/del/{{ user.id }}/"><i class="fa fa-trash-o"></i></a>
+                    </td>=
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
