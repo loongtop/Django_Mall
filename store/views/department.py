@@ -1,5 +1,5 @@
-from crud.factory import products
-from crud.common.get_handler_dict import get_handler_dict
+from crud import products
+from crud import get_handler
 
 
 # Create your views here.
@@ -20,4 +20,4 @@ class Create(products.Create):
     pass
 
 
-handler_dict = get_handler_dict(Create, Read, Update, Delete)
+handler_dict = get_handler(Create, Read, Update, Delete)

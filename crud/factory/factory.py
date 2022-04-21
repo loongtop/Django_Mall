@@ -27,18 +27,18 @@ class CURDFactory(Factory):
             self.app_name = app_name
             self.namespace = namespace
 
-    def register(self, *args, **kwargs):
-            for model in args:
-                for item in model:
-                    self._registry.append({'model_class': item[0], 'handler_dict': item[1]})
+    def register(self, *args, prev=None):
+        for model in args:
+            for item in model:
+                self._registry.append({'model_class': item[0], 'handler_dict': item[1], 'prev': prev})
 
-    def create_urls(self, model_class, handler_dict):
+    def create_urls(self, model_class, handler_dict, prev):
         patterns = []
         name_dict = {'app_name': self.app_name,
                      'namespace': self.namespace}
 
-        for key, value in handler_dict.items():
-            operator = value(model_class, name_dict)
+        for _, operator_item in handler_dict.items():
+            operator = operator_item(model_class, name_dict, prev)
             url = operator.get_url()
             patterns.append(url)
 
@@ -53,10 +53,16 @@ class CURDFactory(Factory):
         for model in self._registry:
             obj = model['model_class']
             handler_dict = model['handler_dict']
+            prev = model['prev']
             app_label = obj._meta.app_label
             model_name = obj._meta.model_name
 
-            patterns.append(re_path(fr'^{app_label}/{model_name}/', (self.create_urls(obj, handler_dict), None, None)))
+            if prev:
+                patterns.append(
+                    re_path(fr'^{app_label}/{model_name}/{prev}', (self.create_urls(obj, handler_dict, prev), None, None)))
+            else:
+                patterns.append(
+                    re_path(fr'^{app_label}/{model_name}/', (self.create_urls(obj, handler_dict, prev), None, None)))
 
         return patterns
 

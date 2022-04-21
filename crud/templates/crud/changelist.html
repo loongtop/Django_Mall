@@ -63,7 +63,8 @@
             <table class="table table-bordered">
                 <thead>
                 <tr>
-                    {% for item in header_list %}
+                    <th>ID</th>
+                    {% for item in head_list %}
                         <th>{{ item }}</th>
                     {% endfor %}
                 </tr>
@@ -71,6 +72,7 @@
                 <tbody>
                 {% for row in body_list %}
                     <tr>
+                        <td>{{ forloop.counter }}</td>
                         {% for ele in row %}
                             <td>{{ ele }}</td>
                         {% endfor %}

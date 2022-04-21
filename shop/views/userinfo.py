@@ -1,23 +1,13 @@
-from crud.factory import products
-from crud.common.get_handler_dict import get_handler_dict
+from crud import get_handler
+from crud.factory.products import Read as CRUDRead
 
 
 # Create your views here.
 
-class Read(products.Read):
-    pass
+class Read(CRUDRead):
+
+    display_list = [CRUDRead.checkbox, 'name', 'email', CRUDRead.update, CRUDRead.delete]
 
 
-class Delete(products.Delete):
-    pass
-
-
-class Update(products.Update):
-    pass
-
-
-class Create(products.Create):
-    pass
-
-
-handler_dict = get_handler_dict(Create, Read, Update, Delete)
+#########################
+handler_dict = get_handler(read=Read)

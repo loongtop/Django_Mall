@@ -6,7 +6,7 @@ from store.views import client, department
 
 
 register_item = ((Client, client.handler_dict),
-                 (Department, department.handler_dict),)
+                 (Department, department.handler_dict,))
 
 
 def get_store_urls(namespace, app_name='CRUD', item=register_item):
@@ -15,6 +15,4 @@ def get_store_urls(namespace, app_name='CRUD', item=register_item):
 
     factory.register(item)
 
-    urlpatterns = [re_path('', factory.urls)]
-
-    return urlpatterns
+    return [re_path('', factory.urls)]
