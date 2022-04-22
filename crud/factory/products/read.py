@@ -10,6 +10,7 @@ from crud.utils.pagination import Pagination
 class Read(Handler):
     name = 'read'
     display_list = []
+    has_create_btn = True
 
     def __init__(self, model_class, name_dict, prev):
         super().__init__(model_class, name_dict, prev)
@@ -48,9 +49,11 @@ class Read(Handler):
 
         data_list = objects[pager.start: pager.end]
 
-        data_pack = DataPack(self, data_list, pager,)
+        data_pack = DataPack(self, data_list, pager, )
 
-        return render(request, 'crud/changelist.html', {'data_pack': data_pack})
+        create_btn = self.get_create_btn()
+
+        return render(request, 'crud/changelist.html', {'data_pack': data_pack, 'create_btn': create_btn,})
 
     def changelist_view(self, request, *args, **kwargs):
         """
@@ -201,15 +204,9 @@ class Read(Handler):
         return re_path(fr'{self.name}/$', super().wrapper(self.read), name=self.get_reverse_name)
 
 ########################
-    has_create_btn = True
-
     def get_create_btn(self):
         if self.has_create_btn:
-            namespace = self.name_dict.get('namespace')
-
-            name = Handler.handler_name.get('create')
-            reverse_name = f'{namespace}:{self.get_app_model_name}_{name}'
-            create_url = reverse(reverse_name)
+            create_url = self.reverse_url('create')
             return f'<a class="btn btn-primary" href="{create_url}">Create</a>'
         return None
 

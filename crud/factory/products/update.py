@@ -20,7 +20,7 @@ class Update(Handler):
         """
         current_change_object = self.model_class.objects.filter(pk=pk).first()
         if not current_change_object:
-            return HttpResponse('要修改的数据不存在，请重新选择！')
+            return HttpResponse('The data to be modified does not exist, please select again!')
 
         model_form_class = self.get_modelform_class()
         if request.method == 'GET':
@@ -28,7 +28,7 @@ class Update(Handler):
             return render(request, 'crud/change.html', {'form': form})
         form = model_form_class(data=request.POST, instance=current_change_object)
         if form.is_valid():
-            self.save(form, is_update=False)
-            # 在数据库保存成功后，跳转回列表页面(携带原来的参数)。
-            return redirect(self.reverse_url(self.name))
+            self.save_form(form, is_update=False)
+            # After the database is successfully saved, jump back to the list page (with the original parameters).
+            return redirect(self.reverse_read_url())
         return render(request, 'crud/change.html', {'form': form})

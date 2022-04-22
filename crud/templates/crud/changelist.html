@@ -54,15 +54,17 @@
                     </div>
                 </div>
             {% endif %}
-            {% if add_btn %}
+            {% if create_btn %}
                 <div style="margin: 5px 0;float: left">
-                    {{ add_btn|safe }}
+                    {{ create_btn | safe }}
                 </div>
             {% endif %}
-            {% head_data_list data_pack %}
+            <div>
+                {% head_data_list data_pack %}
+            </div>
         </form>
         <nav>
-            <ul class="pagination">
+            <ul class="pagination float: left" >
                 {{ data_pack.pager.page_html|safe }}
             </ul>
         </nav>

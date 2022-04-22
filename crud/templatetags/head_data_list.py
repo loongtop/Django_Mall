@@ -33,9 +33,9 @@ def get_data(data_pack):
                 param = {'request': data_pack.request,
                          'namespace': data_pack.name_dict['namespace'],
                          'url_name': url_name}
-                val = key_or_func(param, row, is_header=False)
+                val: object = key_or_func(param, row, is_header=False)
             else:
-                val = getattr(row, key_or_func)
+                val: object = getattr(row, key_or_func)
 
             tr_list.append(val)
         yield tr_list

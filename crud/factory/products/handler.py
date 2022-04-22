@@ -22,6 +22,7 @@ class Handler(metaclass=ABCMeta):
         self.request = None
         self._modelform = None
         self.request = None
+        self.model_form_class = None
 
     def get_app_model_name(self, param):
         app_label = self.model_class._meta.app_label
@@ -40,17 +41,17 @@ class Handler(metaclass=ABCMeta):
         pass
 
     # 可以自定制ModelForm已经增加clean_name函数
-    @property
     def get_modelform_class(self):
-        if self.model_class:
-            return self.model_class
 
-        class CurrentModelForm(forms.ModelForm):
+        if model_form_class := self.model_form_class:
+            return model_form_class
+
+        class DynamicModelForm(BootstrapModelForm):
             class Meta:
                 model = self.model_class
                 fields = "__all__"
 
-        return CurrentModelForm
+        return DynamicModelForm
 
     def save_form(self, form, is_update=False):
         """
@@ -77,14 +78,34 @@ class Handler(metaclass=ABCMeta):
         When jumping back to the list page, generate the URL
         :return:
         """
-        namespace = self.name_dict.get('namespace')
-        url_name = self.get_app_model_name(name)
-        name = "%s:%s" % (namespace, url_name)
-        base_url = reverse(name, args=args, kwargs=kwargs)
+        reverse_name = f"{self.name_dict.get('namespace')}:{self.get_app_model_name(name)}"
+        # update del create
+        if name == 'update':
+            base_url = reverse(reverse_name)
+        base_url = reverse(reverse_name, args=args, kwargs=kwargs)
+
+        if not self.request.GET:
+            add_url = base_url
+        else:
+            param = self.request.GET.urlencode()
+            new_query_dict = QueryDict(mutable=True)
+            new_query_dict['_filter'] = param
+            add_url = f'{base_url}?{param}'
+
+        return add_url
+
+    def reverse_read_url(self):
+        """
+        When jumping back to the list page, generate the URL
+        :return:
+        """
+        reverse_name = f"{self.name_dict.get('namespace')}:{self.get_app_model_name('read')}"
+        base_url = reverse(reverse_name)
         param = self.request.GET.get('_filter')
+
         if not param:
             return base_url
-        return "%s?%s" % (base_url, param,)
+        return f'{base_url}?{param}'
 
 
 

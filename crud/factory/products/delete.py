@@ -17,7 +17,7 @@ class Delete(Handler):
         :param pk:
         :return:
         """
-        origin_list_url = self.reverse_url(self.name)
+        origin_list_url = self.reverse_read_url()
         if request.method == 'GET':
             return render(request, 'crud/delete.html', {'cancel': origin_list_url})
 
