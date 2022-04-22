@@ -1,29 +1,25 @@
-from .handler import Handler
-from django.urls import re_path
+from django.urls import re_path, reverse
 from django.shortcuts import render
 from types import FunctionType
-from crud.utils.pagination import Pagination
-
 from django.db.models import Q
-from .bootstrap import BootstrapModelForm
 
-from django.utils.safestring import mark_safe
-from django.urls import reverse
-from django.http import QueryDict
-from django.db import models
+from .handler import Handler
+from crud.utils.pagination import Pagination
 
 
 class Read(Handler):
+    name = 'read'
     display_list = []
 
     def __init__(self, model_class, name_dict, prev):
         super().__init__(model_class, name_dict, prev)
 
-        self.per_page_count = 2
-        self.has_create_btn = True
+        self.per_page_count = 4
         self.pager = None
         self.request = None
-
+        self.component = None
+        self.name_dict = name_dict
+        self.model_class = model_class
 
     @property
     def display(self):
@@ -32,14 +28,15 @@ class Read(Handler):
         return value
 
     def get_head_body_list(self, data_list):
-        # 处理显示表头
+        # Inclusion tag and yield
         head_list = []
         display_list = self.display
 
         if display_list:
             for key_or_func in display_list:
                 if isinstance(key_or_func, FunctionType):
-                    verbose_name = key_or_func(self, obj=None, is_header=True)
+                    param = {}
+                    verbose_name = key_or_func(param, obj=None, is_header=True)
                 else:
                     verbose_name = self._model_class._meta.get_field(key_or_func).verbose_name
                 head_list.append(verbose_name)
@@ -53,7 +50,10 @@ class Read(Handler):
             if display_list:
                 for key_or_func in display_list:
                     if isinstance(key_or_func, FunctionType):
-                        tr_list.append(key_or_func(self, row, is_header=False))
+                        name = key_or_func.__name__
+                        url_name = self.get_app_model_name(name)
+                        param = {'request': self.request, 'namespace': self._name_dict['namespace'], 'url_name': url_name}
+                        tr_list.append(key_or_func(param, row, is_header=False))
                     else:
                         tr_list.append(getattr(row, key_or_func))  # obj.gender
             else:
@@ -88,7 +88,8 @@ class Read(Handler):
         return render(request, 'crud/changelist.html', {'data_list': data_list,
                                                         'head_list': head_list,
                                                         'body_list': body_list,
-                                                        'pager': pager})
+                                                        'pager': pager
+                                                        })
 
     def changelist_view(self, request, *args, **kwargs):
         """
@@ -193,27 +194,6 @@ class Read(Handler):
             }
         )
 
-    def get_create_btn(self):
-        if self.has_create_btn:
-            namespace = self._name_dict.get('namespace')
-
-            name = Handler.handler_name.get('create')
-            reverse_name = f'{namespace}:{self.get_app_model_name}_{name}'
-            create_url = reverse(reverse_name)
-            return f'<a class="btn btn-primary" href="{create_url}">Create</a>'
-        return None
-
-    def get_model_form_class(self):
-        if self._model_class:
-            return self._model_class
-
-        class DynamicModelForm(BootstrapModelForm):
-            class Meta:
-                model = self.model_class
-                fields = "__all__"
-
-        return DynamicModelForm
-
     def get_order_list(self):
         return self.order_list or ['-id', ]
 
@@ -257,55 +237,25 @@ class Read(Handler):
 
     def get_url(self):
 
-        return re_path(r'read/$', super().wrapper(self.read), name=self.get_reverse_name)
+        return re_path(fr'{self.name}/$', super().wrapper(self.read), name=self.get_reverse_name)
 
-    def checkbox(self, obj: models.Model = None, is_header=None):
-        """
-        :param obj:
-        :param is_header:
-        :return:
-        """
-        if is_header:
-            return "Operation"
-        return mark_safe(f'<input type="checkbox" name="pk" value="{obj.pk}" />')
+########################
+    has_create_btn = True
 
-    def update(self, obj: models.Model = None, is_header=None):
-        """
-        :param obj:
-        :param is_header:
-        :return:
-        """
-        if is_header:
-            return "Update"
+    def get_create_btn(self):
+        if self.has_create_btn:
+            namespace = self._name_dict.get('namespace')
 
-        url = self.reverse_url(pk=obj.pk, name='update')
-        return mark_safe(f'<a href="{url}">Update</a>')
+            name = Handler.handler_name.get('create')
+            reverse_name = f'{namespace}:{self.get_app_model_name}_{name}'
+            create_url = reverse(reverse_name)
+            return f'<a class="btn btn-primary" href="{create_url}">Create</a>'
+        return None
 
-    def delete(self, obj: models.Model = None, is_header=None):
-        """
-        :param obj:
-        :param is_header:
-        :return:
-        """
-        if is_header:
-            return "Delete"
-        url = self.reverse_url(pk=obj.pk, name='delete')
-        return mark_safe(f'<a href="{url}">Delete</a>')
 
-    def reverse_url(self, name, *args, **kwargs):
 
-        namespace = self._name_dict['namespace']
-        url_name = self.get_app_model_name(name)
-        fullname = f'{namespace}:{url_name}'
-        base_url = reverse(fullname, args=args, kwargs=kwargs)
-        if not self.request.GET:
-            add_url = base_url
-        else:
-            param = self.request.GET.urlencode()
-            new_query_dict = QueryDict(mutable=True)
-            new_query_dict['_filter'] = param
-            add_url = "{base_url}?{new_query_dict.urlencode()}"
-        return add_url
+
+
 
 
 

@@ -20,6 +20,8 @@ class Handler(metaclass=ABCMeta):
         self._name_dict = name_dict
         self.prev = prev
         self.request = None
+        self._modelform = None
+        self.request = None
 
     def get_app_model_name(self, param):
         app_label = self._model_class._meta.app_label
@@ -37,8 +39,12 @@ class Handler(metaclass=ABCMeta):
     def get_url(self):
         pass
 
+    # 可以自定制ModelForm已经增加clean_name函数
     @property
-    def get_model_form_class(self):
+    def get_modelform_class(self):
+        if self._model_class:
+            return self._model_class
+
         class CurrentModelForm(forms.ModelForm):
             class Meta:
                 model = self._model_class
@@ -65,6 +71,21 @@ class Handler(metaclass=ABCMeta):
 
     def extra_urls(self):
         return []
+
+    def reverse_url(self, name,  *args, **kwargs):
+        """
+        When jumping back to the list page, generate the URL
+        :return:
+        """
+        namespace = self._name_dict.get('namespace')
+        url_name = self.get_app_model_name(name)
+        name = "%s:%s" % (namespace, url_name)
+        base_url = reverse(name, args=args, kwargs=kwargs)
+        param = self.request.GET.get('_filter')
+        if not param:
+            return base_url
+        return "%s?%s" % (base_url, param,)
+
 
 
 

@@ -1,12 +1,13 @@
 from crud import products
 from crud import get_handler
+from crud import Operation
 
 
 # Create your views here.
 
 class Read(products.Read):
 
-    display_list = ['first_name', 'phone', 'gender']
+    display_list = [Operation.checkbox, 'first_name', 'phone', 'gender', Operation.update, Operation.delete]
 
 
 class Delete(products.Delete):

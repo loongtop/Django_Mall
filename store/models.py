@@ -19,9 +19,8 @@ class Client(models.Model):
     company = models.CharField(verbose_name='Company', max_length=32, null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return self.first_name
 
 
 class Department(models.Model):
     title = models.CharField(verbose_name='Title', max_length=32)
-

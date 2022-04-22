@@ -1,6 +1,6 @@
 from .factory.factory import CURDFactory
 from .factory import products
-
+from .factory.components.operation import Operation
 '''
 The method of get or create the factory of crud component
 All of the objects int the Django are Singleton

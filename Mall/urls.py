@@ -22,5 +22,5 @@ from store.store_crud import get_store_urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(get_shop_urls(namespace='Shop'))),
-    # path('', include(get_store_urls(namespace='Store'))),
+    path('', include(get_store_urls(namespace='Store'))),
  ]

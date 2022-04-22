@@ -21,10 +21,10 @@ class Option(object):
 
         self.is_choice = False
 
-    def get_db_condition(self, request, *args, **kwargs):
+    def get_db_condition(self):
         return self.db_condition
 
-    def get_queryset_or_tuple(self, model_class, request, *args, **kwargs):
+    def get_queryset_or_tuple(self, model_class, request):
         """
         Get the data associated with the database according to the field
         :return:
@@ -37,7 +37,7 @@ class Option(object):
         # Get relevant data
         if isinstance(field_object, ForeignKey) or isinstance(field_object, ManyToManyField):
             # FK and M2M should get the data in their associated tables: QuerySet
-            db_condition = self.get_db_condition(request, *args, **kwargs)
+            db_condition = self.get_db_condition()
             return SearchGroupRow(title, field_object.rel.model.objects.filter(**db_condition), self, request.GET)
         else:
             # Get data in choice: tuple
