@@ -40,7 +40,7 @@ class Handler(metaclass=ABCMeta):
     def get_url(self):
         pass
 
-    # 可以自定制ModelForm已经增加clean_name函数
+    # customize the you own ModelForm which contain clean_name function etc.
     def get_modelform_class(self):
 
         if model_form_class := self.model_form_class:
@@ -55,7 +55,7 @@ class Handler(metaclass=ABCMeta):
 
     def save_form(self, form, is_update=False):
         """
-        在使用ModelForm保存数据之前预留的钩子方法
+        Hook method reserved before saving data with ModelForm
         :param form:
         :param is_update:
         :return:
