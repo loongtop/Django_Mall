@@ -14,12 +14,11 @@ class Read(Handler):
     def __init__(self, model_class, name_dict, prev):
         super().__init__(model_class, name_dict, prev)
 
-        self.per_page_count = 4
+        self.per_page_count = 3
         self.pager = None
         self.request = None
         self.component = None
         self.name_dict = name_dict
-        self.model_class = model_class
 
     @property
     def display(self):
@@ -27,48 +26,13 @@ class Read(Handler):
         value.extend(self.display_list)
         return value
 
-    def get_head_body_list(self, data_list):
-        # Inclusion tag and yield
-        head_list = []
-        display_list = self.display
-
-        if display_list:
-            for key_or_func in display_list:
-                if isinstance(key_or_func, FunctionType):
-                    param = {}
-                    verbose_name = key_or_func(param, obj=None, is_header=True)
-                else:
-                    verbose_name = self._model_class._meta.get_field(key_or_func).verbose_name
-                head_list.append(verbose_name)
-        else:
-            head_list.append(self._model_class._meta.model_name)
-
-        # 处理表的内容
-        body_list = []
-        for row in data_list:
-            tr_list = []
-            if display_list:
-                for key_or_func in display_list:
-                    if isinstance(key_or_func, FunctionType):
-                        name = key_or_func.__name__
-                        url_name = self.get_app_model_name(name)
-                        param = {'request': self.request, 'namespace': self._name_dict['namespace'], 'url_name': url_name}
-                        tr_list.append(key_or_func(param, row, is_header=False))
-                    else:
-                        tr_list.append(getattr(row, key_or_func))  # obj.gender
-            else:
-                tr_list.append(row)
-            body_list.append(tr_list)
-
-        return head_list, body_list
-
     def read(self, request):
         """
         :param request:
         :return:
         """
 
-        objects = self._model_class.objects.all()
+        objects = self.model_class.objects.all()
         cnt = objects.count()
         params = request.GET.copy()
         params._mutable = True
@@ -83,13 +47,10 @@ class Read(Handler):
         )
 
         data_list = objects[pager.start: pager.end]
-        head_list, body_list = self.get_head_body_list(data_list)
 
-        return render(request, 'crud/changelist.html', {'data_list': data_list,
-                                                        'head_list': head_list,
-                                                        'body_list': body_list,
-                                                        'pager': pager
-                                                        })
+        data_pack = DataPack(self, data_list, pager,)
+
+        return render(request, 'crud/changelist.html', {'data_pack': data_pack})
 
     def changelist_view(self, request, *args, **kwargs):
         """
@@ -244,7 +205,7 @@ class Read(Handler):
 
     def get_create_btn(self):
         if self.has_create_btn:
-            namespace = self._name_dict.get('namespace')
+            namespace = self.name_dict.get('namespace')
 
             name = Handler.handler_name.get('create')
             reverse_name = f'{namespace}:{self.get_app_model_name}_{name}'
@@ -253,7 +214,16 @@ class Read(Handler):
         return None
 
 
-
+class DataPack(object):
+    def __init__(self, config, data_list, pager):
+        self.config = config
+        self.data_list = data_list
+        self.display = config.display
+        self.model_class = config.model_class
+        self.pager = pager
+        self.get_app_model_name = config.get_app_model_name
+        self.request = config.request
+        self.name_dict = config.name_dict
 
 
 

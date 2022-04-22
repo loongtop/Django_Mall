@@ -1,0 +1,20 @@
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>ID</th>
+        {% for item in head_list %}
+            <th>{{ item }}</th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in data_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            {% for ele in row %}
+                <td> {{ ele }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

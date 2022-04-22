@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load head_data_list %}
 
 {% block content %}
     <div class="luffy-container">
@@ -53,39 +54,16 @@
                     </div>
                 </div>
             {% endif %}
-
             {% if add_btn %}
                 <div style="margin: 5px 0;float: left">
                     {{ add_btn|safe }}
                 </div>
             {% endif %}
-
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    {% for item in head_list %}
-                        <th>{{ item }}</th>
-                    {% endfor %}
-                </tr>
-                </thead>
-                <tbody>
-                {% for row in body_list %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        {% for ele in row %}
-
-                            <td> {{ ele }}</td>
-
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+            {% head_data_list data_pack %}
         </form>
         <nav>
             <ul class="pagination">
-                {{ pager.page_html|safe }}
+                {{ data_pack.pager.page_html|safe }}
             </ul>
         </nav>
 

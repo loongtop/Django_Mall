@@ -16,16 +16,16 @@ class Handler(metaclass=ABCMeta):
 
     def __init__(self, model_class, name_dict, prev):
         self._name = self.__class__.__name__.lower()
-        self._model_class = model_class
-        self._name_dict = name_dict
+        self.model_class = model_class
+        self.name_dict = name_dict
         self.prev = prev
         self.request = None
         self._modelform = None
         self.request = None
 
     def get_app_model_name(self, param):
-        app_label = self._model_class._meta.app_label
-        model_name = self._model_class._meta.model_name
+        app_label = self.model_class._meta.app_label
+        model_name = self.model_class._meta.model_name
 
         if self.prev:
             return f'{app_label}_{model_name}_{self.prev}_{param}'
@@ -42,12 +42,12 @@ class Handler(metaclass=ABCMeta):
     # 可以自定制ModelForm已经增加clean_name函数
     @property
     def get_modelform_class(self):
-        if self._model_class:
-            return self._model_class
+        if self.model_class:
+            return self.model_class
 
         class CurrentModelForm(forms.ModelForm):
             class Meta:
-                model = self._model_class
+                model = self.model_class
                 fields = "__all__"
 
         return CurrentModelForm
@@ -77,7 +77,7 @@ class Handler(metaclass=ABCMeta):
         When jumping back to the list page, generate the URL
         :return:
         """
-        namespace = self._name_dict.get('namespace')
+        namespace = self.name_dict.get('namespace')
         url_name = self.get_app_model_name(name)
         name = "%s:%s" % (namespace, url_name)
         base_url = reverse(name, args=args, kwargs=kwargs)
